@@ -1,0 +1,507 @@
+// markdown parser
+// (this is completely different from s.soggy.cat/info, so no sog nabbing this time)
+
+(function () {
+    var contentroot = document.querySelector(".content");
+    var maintitle = '<h1 class="title">$TITLE$</h1>';
+
+    var hostwhitelist = [
+        window.location.hostname,
+        "github.com",
+        "raw.githubusercontent.com",
+        "files.catbox.moe",
+        "imgur.com",
+        "i.imgur.com",
+        "drive.google.com",
+        "gyazo.com", //
+        "prnt.sc", // if you use these you're a boomer man i'm sorry
+        "postimg.cc", //
+        "ibb.co"
+    ];
+    var blockedext = {
+        svg: true, svgz: true,
+        html: true, htm: true, xml: true,
+        js: true, mjs: true, cjs: true,
+        vbs: true, wasm: true
+    };
+
+    var externallink = "/assets/images/icons/linkbluesmall.png";
+
+    /*//////////////////////////////////////////////////////////////////////*/
+
+    function escapehtml(val) {
+        return String(val || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+    }
+    function escapeattr(val) {
+        return escapehtml(val).replace(/"/g, "&quot;");
+    }
+    function isexternalhref(href) {
+        try {
+            var parsed = new URL(href, window.location.href);
+            return parsed.origin !== window.location.origin;
+        } catch (_err) {
+            return false;
+        }
+    }
+    function makewikihref(target) {
+        return window.location.pathname + wikilinktohash(target);
+    }
+    function isallowedhost(hostname) {
+        var lower = String(hostname || "").toLowerCase();
+        return hostwhitelist.some(function (host) {
+            var allowed = String(host || "").toLowerCase();
+            return lower === allowed || lower.endsWith("." + allowed);
+        });
+    }
+    function normalizemediaurl(rawurl) {
+        var raw = String(rawurl || "").trim();
+        if (!raw) return { ok: false, reason: "No media URL was provided." };
+        if (/^\s*javascript:/i.test(raw) || /^\s*data:/i.test(raw)) {
+            return { ok: false, reason: "This URL scheme is not allowed..." };
+        }
+
+        var parsed;
+        try {parsed = new URL(raw, window.location.href)} 
+        catch (_err) {return {ok: false, reason: "The URL for this file was invalid."}}
+
+        var islocal = !parsed.host || parsed.origin === window.location.origin;
+        if (!islocal && !isallowedhost(parsed.hostname)) {
+            return {ok: false, reason: "This host is not whitelisted."};
+        }
+
+        var pathname = parsed.pathname || "";
+        var extmatch = pathname.toLowerCase().match(/\.([a-z0-9]+)$/);
+        var ext = extmatch ? extmatch[1] : "";
+        if (ext && blockedext[ext]) {
+            return {ok: false, reason: "." + ext + " files are blocked for safety."};
+        }
+
+        return {ok: true, url: parsed.href, ext: ext};
+    }
+    function getdecodedfilenamefromurl(url) {
+        try {
+            var parsed = new URL(url, window.location.href);
+            var parts = (parsed.pathname || "").split("/").filter(Boolean);
+            var rawname = parts.length ? parts[parts.length - 1] : "media";
+            return decodeURIComponent(rawname);
+        } catch (_err) {
+            return "media";
+        }
+    }
+    function maybeprependlocalimagepath(rawurl) {
+        var val = String(rawurl || "").trim();
+        if (!val) return val;
+        if (/^(https?:|data:|javascript:|\/\/|\/|#|\.\/|\.\.\/)/i.test(val)) return val;
+        if (val.indexOf("/") === -1) return "/articles/media/" + val;
+        return val;
+    }
+    function sanitizehref(rawhref) {
+        var href = String(rawhref || "").trim();
+        if (!href) return "#";
+        if (href[0] === "#" || href[0] === "/") return escapeattr(href);
+        if (href.startsWith("./") || href.startsWith("../")) return escapeattr(href);
+
+        var parsed;
+        try {
+            parsed = new URL(href, window.location.href);
+        } catch (_err) {
+            return "#";
+        }
+
+        var protocol = parsed.protocol.toLowerCase();
+        if (protocol === "http:" || protocol === "https:" || protocol === "mailto:") {
+            return escapeattr(parsed.href);
+        }
+        return "#";
+    }
+    function resolvecardlink(rawlink) {
+        var val = String(rawlink || "").trim();
+        if (!val) return "#";
+        if (/^(https?:|mailto:|#|\/|\.\/|\.\.\/)/i.test(val)) return sanitizehref(val);
+        return escapeattr(makewikihref(val));
+    }
+    function appendexternalicon(html) {
+        return '<span class="externallinkwrap">' + html + '<img class="externalicon" src="' + escapeattr(externallink) + '" aria-hidden="true"></span>';
+    }
+    function buildlinkhtml(labelhtml, href) {
+        var safehref = sanitizehref(href);
+        var isexternal = isexternalhref(safehref);
+        var base = '<a href="' + safehref + '"' + (isexternal ? ' rel="noopener noreferrer nofollow" target="_blank"' : "") + ">" + labelhtml + "</a>";
+        return isexternal ? appendexternalicon(base) : base;
+    }
+
+    /*//////////////////////////////////////////////////////////////////////*/
+
+    function normalizehash() {
+        var raw = window.location.hash ? window.location.hash.slice(1) : "Main_Page";
+        if (!raw) raw = "Main_Page";
+        return decodeURIComponent(raw.trim());
+    }
+    function displaytitlefrompagename(pagename) {
+        return pagename.replace(/_/g, " ").trim() || "Untitled";
+    }
+    function wikilinktohash(target) {
+        return "#" + target.trim().replace(/\s+/g, "_");
+    }
+
+    /*//////////////////////////////////////////////////////////////////////*/
+
+    function parseinline(txt) {
+        var escapes = [];
+        var neutralized = String(txt || "").replace(/\\([\\`*_~\[\]\(\)])/g, function (_, ch) {
+            var token = "%%esc" + escapes.length + "%%";
+            escapes.push(ch);
+            return token;
+        });
+        var safe = escapehtml(neutralized);
+
+        safe = safe
+            // inline code with single or double backticks
+            .replace(/``([^`]+)``/g, "<code>$1</code>")
+            .replace(/`([^`]+)`/g, "<code>$1</code>")
+            // bold
+            .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+            // italic
+            .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+            // underline
+            .replace(/__([^_]+)__/g, "<u>$1</u>")
+            .replace(/_([^_]+)_/g, "<u>$1</u>")
+            // strikethrough
+            .replace(/~~([^~]+)~~/g, "<del>$1</del>")
+            .replace(/~([^~]+)~/g, "<del>$1</del>")
+            // article links with a custom label
+            .replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, function (_, t, l) {
+                return '<a href="' + escapeattr(makewikihref(t)) + '">' + l + "</a>";
+            })
+            // article links
+            .replace(/\[\[([^\]]+)\]\]/g, function (_, t) {
+                return '<a href="' + escapeattr(makewikihref(t)) + '">' + t.replace(/_/g, " ") + "</a>";
+            })
+            // external links
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (_, label, href) {
+                return buildlinkhtml(label, href);
+            });
+
+        escapes.forEach(function (ch, idx) {
+            safe = safe.replace(new RegExp("%%esc" + idx + "%%", "g"), escapehtml(ch));
+        });
+        return safe;
+    }
+
+    function guessmediatype(ext) {
+        var image = { png: 1, jpg: 1, jpeg: 1, webp: 1, gif: 1, bmp: 1, ico: 1, avif: 1 };
+        var audio = { mp3: 1, wav: 1, ogg: 1, m4a: 1, aac: 1, flac: 1 };
+        var video = { mp4: 1, webm: 1, ogv: 1, mov: 1, m4v: 1 };
+        if (image[ext]) return "image";
+        if (audio[ext]) return "audio";
+        if (video[ext]) return "video";
+        return "unknown";
+    }
+    function mediarenderhtml(url, mediatype) {
+        var safeurl = escapeattr(url);
+        if (mediatype === "image") return '<img loading="lazy" src="' + safeurl + '">';
+        if (mediatype === "audio") return '<audio controls preload="metadata" src="' + safeurl + '"></audio>';
+        if (mediatype === "video") return '<video controls preload="metadata" src="' + safeurl + '"></video>';
+        var filename = escapehtml(getdecodedfilenamefromurl(url));
+        return '<p class="paragraph"><a href="' + safeurl + '">' + filename + "</a></p>";
+    }
+    function renderdangercard(title, text) {
+        return (
+            '<section class="card carddanger">' +
+            '<h3><img class="cardicon" src="/assets/images/icons/danger.png"> ' + parseinline(title || "Danger") + "</h3>" +
+            "<p>" + parseinline(text || "") + "</p>" +
+            "</section>"
+        );
+    }
+
+    function parsedirectiveblock(name, args, lines) {
+        var data = {};
+        var rowsource = [];
+        var lastkey = "";
+        lines.forEach(function (line) {
+            var idx = line.indexOf(":");
+            var looksproperty = idx > 0 && line.slice(0, idx).trim() !== "";
+
+            if (looksproperty) {
+                var rawkey = line.slice(0, idx).trim();
+                var key = rawkey.toLowerCase();
+                var val = line.slice(idx + 1).trim();
+                if (key) {
+                    data[key] = val;
+                    rowsource.push({ rawkey: rawkey, key: key, value: val });
+                    lastkey = key;
+                }
+                return;
+            }
+
+            if (lastkey) {
+                var cont = line.trim();
+                data[lastkey] += "\n" + cont;
+                for (var r = rowsource.length - 1; r >= 0; r--) {
+                    if (rowsource[r].key === lastkey) {
+                        rowsource[r].value = data[lastkey];
+                        break;
+                    }
+                }
+            }
+        });
+
+        // ::infobox
+        if (name === "infobox") {
+            var imagehtml = "";
+            if (data.image) {
+                var infoboximage = maybeprependlocalimagepath(data.image);
+                var img = normalizemediaurl(infoboximage);
+                if (img.ok && guessmediatype(img.ext) === "image") {
+                    imagehtml = '<img src="' + escapeattr(img.url) + '">';
+                } else if (!img.ok) {
+                    imagehtml = '<p class="paragraph infoboxwarning">' + parseinline(img.reason) + "</p>";
+                }
+            }
+
+            var rows = rowsource
+                .filter(function (r) { return r.key !== "title" && r.key !== "image"; })
+                .map(function (r) {
+                    return "<tr><th>" + parseinline(r.rawkey) + "</th><td>" + parseinline(r.value) + "</td></tr>";
+                }).join("");
+
+            return (
+                '<aside class="infobox">' +
+                (data.title ? "<h3>" + parseinline(data.title) + "</h3>" : "") +
+                imagehtml +
+                "<table>" + rows + "</table>" +
+                "</aside>"
+            );
+        }
+
+        // ::media / ::video / ::image
+        if (name === "video" || name === "image" || name === "media") {
+            var rawmediaurl = data.url || "";
+            var alignment = args[0] === "left" || args[0] === "right" ? args[0] : "";
+            var chosenmediatype = name === "video" ? "video" : (name === "image" ? "image" : "");
+            if (name === "media" || chosenmediatype === "image") rawmediaurl = maybeprependlocalimagepath(rawmediaurl);
+
+            var media = normalizemediaurl(rawmediaurl);
+            if (!media.ok) {
+                return renderdangercard("Blocked media", media.reason);
+            }
+
+            var mediatype = chosenmediatype || guessmediatype(media.ext);
+            var alignclass = alignment ? " embed" + alignment : "";
+
+            return (
+                '<figure class="embed' + alignclass + '">' +
+                mediarenderhtml(media.url, mediatype) +
+                (data.caption ? "<figcaption>" + parseinline(data.caption) + "</figcaption>" : "") +
+                "</figure>"
+            );
+        }
+
+        // ::card (info, warning, danger)
+        if (name === "card") {
+            var cardtype = (args[0] || "info").toLowerCase();
+            if (cardtype !== "warning" && cardtype !== "danger" && cardtype !== "info") cardtype = "info";
+            var icon = cardtype === "danger"
+                ? "/assets/images/icons/danger.png"
+                : (cardtype === "warning" ? "/assets/images/icons/warning.png" : "/assets/images/icons/info.png");
+
+            return (
+                '<section class="card card' + cardtype + '">' +
+                (data.title ? '<h3><img class="cardicon" src="' + escapeattr(icon) + '"> ' + parseinline(data.title) + "</h3>" : "") +
+                (data.text ? "<p>" + parseinline(data.text) + "</p>" : "") +
+                (data.link ? '<p>' + buildlinkhtml("Read more", resolvecardlink(data.link)) + "</p>" : "") +
+                "</section>"
+            );
+        }
+        return "";
+    }
+
+    /*//////////////////////////////////////////////////////////////////////*/
+
+    function markdowntohtml(md) {
+        var cleanmd = String(md || "")
+            .replace(/\r\n/g, "\n")
+            .replace(/<!--[\s\S]*?-->/g, "");
+        var lines = cleanmd.split("\n");
+        var html = [];
+        var inlist = false;
+        var inblockquote = false;
+
+        function closelist() {
+            if (inlist) {
+                html.push("</ul>");
+                inlist = false;
+            }
+        }
+        function closequote() {
+            if (inblockquote) {
+                html.push("</blockquote>");
+                inblockquote = false;
+            }
+        }
+
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            var trimmed = line.trim();
+
+            if (!trimmed) {
+                closelist();
+                closequote();
+                continue;
+            }
+
+            // code blocks like 
+            // ```lang 
+            // code
+            // ```
+            if (/^```/.test(trimmed)) {
+                closelist();
+                closequote();
+
+                var lang = (trimmed.slice(3).trim().toLowerCase() || "txt").replace(/[^a-z0-9_-]/g, "");
+                var codelines = [];
+                i++;
+                while (i < lines.length && !/^```/.test(lines[i].trim())) {
+                    codelines.push(lines[i]);
+                    i++;
+                }
+                html.push(
+                    '<pre class="codeblock"><code class="language-' + escapeattr(lang || "txt") + '">' +
+                    escapehtml(codelines.join("\n")) +
+                    "</code></pre>"
+                );
+                continue;
+            }
+
+            // ::infobox / ::media / ::card
+            if (trimmed.startsWith("::")) {
+                closelist(); closequote();
+
+                var directiveheader = trimmed.slice(2).trim().toLowerCase();
+                var parts = directiveheader.split(/\s+/).filter(Boolean);
+                var dir = parts[0] || "";
+                var args = parts.slice(1);
+                var block = []; i++;
+                while (i < lines.length && lines[i].trim() !== "::") block.push(lines[i++]);
+                html.push(parsedirectiveblock(dir, args, block));
+                continue;
+            }
+
+            // headings
+            var heading = trimmed.match(/^(#{1,6})\s+(.+)$/);
+            if (heading) {
+                closelist(); closequote();
+                var lvl = heading[1].length;
+                html.push("<h" + lvl + ">" + parseinline(heading[2]) + "</h" + lvl + ">"); continue;
+            }
+
+            // separators
+            if (/^---+$/.test(trimmed)) {
+                closelist(); closequote();
+                html.push("<hr>");
+                continue;
+            }
+
+            // bullet point list
+            if (/^[-*]\s+/.test(trimmed)) {
+                closequote();
+                if (!inlist) {
+                    html.push('<ul class="articlelist">');
+                    inlist = true;
+                }
+                html.push("<li>" + parseinline(trimmed.replace(/^[-*]\s+/, "")) + "</li>");
+                continue;
+            }
+
+            // quotes
+            var quote = trimmed.match(/^>\s?(.*)$/);
+            if (quote) {
+                closelist();
+                if (!inblockquote) {
+                    html.push('<blockquote class="quote">');
+                    inblockquote = true;
+                }
+                html.push("<p>" + parseinline(quote[1]) + "</p>");
+                continue;
+            }
+
+            // small text
+            if (/^-#\s+/.test(trimmed)) {
+                closelist();
+                closequote();
+                html.push('<p class="paragraph smalltext">' + parseinline(trimmed.replace(/^-#\s+/, "")) + "</p>");
+                continue;
+            }
+            closelist(); closequote();
+            html.push('<p class="paragraph">' + parseinline(trimmed) + "</p>");
+        }
+        closelist(); closequote();
+        return html.join("\n");
+    }
+
+    function getarticlecandidates(hashval) {
+        var parts = hashval.split(":");
+        var hasprefix = parts.length > 1;
+        var prefix = hasprefix ? parts[0].trim() : "";
+        var raw = hasprefix ? parts.slice(1).join(":").trim() : hashval.trim();
+        var slug = raw.replace(/\s+/g, "_");
+        var spaced = slug.replace(/_/g, " ");
+        var title = displaytitlefrompagename(slug);
+        var hashtitle = hasprefix ? (prefix + ":" + spaced) : spaced;
+
+        var candidates = hasprefix
+            ? [
+                "articles/~" + prefix + "/" + slug + ".md",
+                "articles/~" + prefix.toLowerCase() + "/" + slug + ".md",
+                "articles/~" + prefix + "/" + spaced + ".md",
+                "articles/~" + prefix.toLowerCase() + "/" + spaced + ".md"
+            ]
+            : [
+                "articles/" + slug + ".md",
+                "articles/" + spaced + ".md"
+            ];
+
+        return { title: title, hashtitle: hashtitle, candidates: candidates };
+    }
+    async function fetchfirstexisting(paths) {
+        for (var i = 0; i < paths.length; i++) {
+            var resp = await fetch(paths[i]);
+            if (resp.ok) return { path: paths[i], markdown: await resp.text() };
+        }
+        return null;
+    }
+
+    /*//////////////////////////////////////////////////////////////////////*/
+
+    async function loadarticlefromhash() {
+        if (!contentroot) return;
+
+        var hashval = normalizehash();
+        var art = getarticlecandidates(hashval);
+        var res = await fetchfirstexisting(art.candidates);
+
+        document.title = art.hashtitle + " - Cut the Rope Modding Wiki!";
+
+        // 404 text, basically, feel free to adjust
+        if (!res) {
+            contentroot.innerHTML =
+                maintitle.replace("$TITLE$", escapehtml(art.hashtitle)) +
+                '<p class="paragraph">There is currently no text in this page. ' +
+                'You can contribute and <a href="https://github.com/CtRHome/wiki/new/main/articles?filename=' + escapeattr(art.title) + '.md">create this page</a>!</p>';
+            return;
+        }
+
+        contentroot.innerHTML =
+            maintitle.replace("$TITLE$", escapehtml(art.hashtitle)) +
+            markdowntohtml(res.markdown);
+        if (window.Prism && typeof window.Prism.highlightAllUnder === "function") {
+            window.Prism.highlightAllUnder(contentroot);
+        }
+    }
+
+    window.addEventListener("hashchange", loadarticlefromhash);
+    document.addEventListener("DOMContentLoaded", loadarticlefromhash);
+})();

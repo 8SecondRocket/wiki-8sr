@@ -1,0 +1,193 @@
+.title {
+    font-size: 2em; margin-bottom: 16px;
+    border-bottom: 2px solid var(--softw) !important;
+}
+
+.paragraph {margin-bottom: 12px}
+.smalltext {
+    font-size: 0.85em;
+    opacity: 0.75;
+}
+
+.quote {
+    margin: 14px 0;
+    padding: 10px 12px;
+    border-left: 5px solid rgba(255,255,255,0.5);
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+}
+.quote p { margin: 0 0 8px; }
+.quote p:last-child { margin-bottom: 0; }
+.section {margin-top: 18px}
+
+.sectiontitle {
+    display: flex; gap: 8px;
+    align-items: baseline;
+    margin-bottom: 8px;
+}
+
+.articlelist {
+    list-style: none; display: grid;
+    gap: 6px; padding-left: 0;
+}
+.articlelist li {
+    position: relative;
+    padding-left: 20px;
+}
+.articlelist li::before {
+    content: ""; position: absolute;
+    left: 0; width: 14px; height: 14px;
+    background: url("/assets/images/icons/bullet.png") no-repeat center / contain;
+}
+
+.content h2, .content h3, .content h4 {
+    margin: 16px 0 10px;
+    padding-bottom: 6px;
+}
+.content code {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.9em;
+    background: rgba(0,0,0,0.25);
+    border-radius: 6px; padding: 2px 6px;
+    text-shadow: none;
+}
+.content pre.codeblock {
+    margin: 14px 0;
+    border-radius: 8px;
+    overflow: auto;
+    text-shadow: none;
+}
+.content pre[class*="language-"] {
+    background: rgba(0,0,0,0.25) !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    padding: 10px 12px !important;
+    border-radius: 20px !important;
+}
+.content code[class*="language-"] {
+    background: transparent !important;
+    text-shadow: none !important;
+}
+.content u {
+    text-decoration-thickness: 2px;
+    text-underline-offset: 2px;
+}
+.content hr {
+    border: 0;
+    border-top: 2px dashed rgba(255,255,255,0.35);
+    margin: 14px 0;
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.infobox {
+    float: right;
+    width: min(320px, 100%);
+    margin: 0 0 14px 14px;
+    background: rgba(255,255,255,0.12);
+    border: 2px solid rgba(255,255,255,0.25);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.infobox h3 {
+    margin: 0; border: 0;
+    background: rgba(0,0,0,0.25);
+    padding: 10px 12px;
+}
+.infobox img {
+    display: block;
+    width: 100%; object-fit: cover;
+}
+.infobox table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95em;
+}
+.infobox th, .infobox td {
+    padding: 8px 10px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    text-align: left; vertical-align: top;
+}
+.infobox th {
+    width: 38%;
+    opacity: 0.95;
+}
+
+/* this is a different kind of infobox, for where issues occur like blacklisted filetypes */
+.infoboxwarning {
+    margin: 6px;
+    background: rgba(255, 0, 0, 0.22);
+    border-radius: 10px; padding: 10px;
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.embed {
+    margin: 16px 0;
+    background: rgba(0,0,0,0.25);
+    border-radius: 12px; padding: 10px;
+    clear: both; width: min(460px, 100%);
+}
+.embed video, .embed img, .embed audio {
+    width: 100%;
+    border-radius: 8px;
+}
+.embed audio {border-radius: 0}
+.embedleft {
+    float: left;
+    margin-right: 14px;
+}
+.embedright {
+    float: right;
+    margin-left: 14px;
+}
+.embed figcaption {
+    margin-top: 8px;
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.card {
+    margin: 16px 0;
+    background: rgba(143,238,255,0.2);
+    border-left: 5px solid rgba(143,238,255,0.8);
+    border-radius: 10px; padding: 10px;
+    clear: both;
+}
+.cardwarning {
+    background: rgba(255, 206, 95, 0.2);
+    border-left-color: rgba(255, 206, 95, 0.85);
+}
+.carddanger {
+    background: rgba(255, 95, 95, 0.22);
+    border-left-color: rgba(255, 95, 95, 0.9);
+}
+.card h3 {
+    margin: 0 0 8px; gap: 8px;
+    border: 0; padding: 0;
+    display: flex; align-items: center;
+}
+.cardicon {
+    height: 1em; width: auto;
+    object-fit: contain;
+    image-rendering: auto;
+}
+.card p {margin: 0 0 8px}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.externallinkwrap {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 3px;
+}
+.externalicon {
+    width: auto !important;
+    height: 1em; margin-left: 0;
+    vertical-align: -0.1em;
+    flex: 0 0 auto;
+}

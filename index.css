@@ -1,0 +1,242 @@
+/* website theme, for article css see markdown.css */
+
+@font-face {
+    font-family: "gooddog";
+    src: url("assets/fonts/gooddog.woff") format("woff");
+    font-weight: 400; font-style: normal;
+}
+
+/* not much here for now.. 
+   add repeating css here for ease of use! */
+:root {
+    --stroke: 0.08em 0.08em 0 #000, -0.08em 0.08em 0 #000, 0.08em -0.08em 0 #000, -0.08em -0.08em 0 #000, 0 0.14em 0 #000;
+    --soft: rgba(0,0,0,0.5);
+    --softw: rgba(255,255,255,0.5);
+}
+
+* {box-sizing: border-box; margin: 0; padding: 0; scrollbar-width: none}
+*::-webkit-scrollbar {width: 0; height: 0}
+
+body {
+    min-height: 100vh; color: white;
+    font-size: 1.1em; line-height: 1;
+    font-family: "gooddog", "comic sans ms", system-ui, sans-serif;
+    text-shadow: var(--stroke);
+    background-color: #e9a856;
+    background-image: url("assets/images/bg.webp");
+    background-size: cover; background-position: center;
+    background-attachment: fixed;
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+a, :any-link {
+    color: #8feeff;
+    text-decoration: none;
+}
+a:hover, :any-link:hover {color: #b4f4ff}
+
+b, strong {font-weight: 700}
+h1, h2, h3, h4, h5, h6 {font-weight: 400}
+
+.page {
+    width: min(1300px, 100vw);
+    margin: 0 auto; display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 20px; padding: 0 20px; padding-bottom: 8em
+}
+
+.logo {
+    display: block;
+    width: 100%; max-height: 170px; max-width: 170px;
+    margin: 2px auto 40px;
+    position: relative;
+}
+.wikititle {
+    width: max-content;
+    font-size: 1.75em; position: absolute;
+    left: 50%; text-shadow: var(--stroke);
+    transform: translateX(-50%);
+    bottom: 0; z-index: 99;
+}
+
+.sidebar {
+    background: var(--soft);
+    border-radius: 0 0 22px 22px; padding: 10px 14px 16px;
+    align-self: start; cursor: pointer;
+}
+.shortlink, .link {
+    word-break: break-all;
+    white-space: normal;
+}
+
+.navblock {
+    margin-top: 8px;
+    font-size: 0.95em;
+}
+.navblocktitle {
+    margin: 14px 0 8px;
+    opacity: 0.95;
+}
+.navlist {
+    list-style: none;
+    display: grid;
+    gap: 6px;
+}
+.navdivider {
+    border: 0;
+    border-top: 2px solid rgba(255, 255, 255, 0.55);
+    margin: 14px 0 8px;
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.main {
+    min-width: 0;
+    padding-top: 14px;
+}
+
+.toolbar {
+    display: flex; gap: 10px;
+    align-items: flex-end;
+    margin-bottom: 0; min-width: 0;
+    flex-wrap: nowrap;
+}
+
+.tabs {
+    list-style: none; display: flex;
+    flex-wrap: nowrap;
+    gap: 0; flex: 0 0 auto;
+    min-width: 0;
+}
+
+.tab {
+    color: #fff; padding: 12px;
+    background: linear-gradient(to top, rgba(0,0,0,0.3), rgba(0,0,0,0));
+    border-right: 1px solid rgba(0,0,0,0.3);
+    display: inline-flex; align-items: center;
+    gap: 6px; white-space: nowrap; min-width: 0;
+}
+.tab.active {background: linear-gradient(to top, rgba(0,0,0,0.5), rgba(0,0,0,0));}
+
+.search {
+    color: #fff; background: var(--soft);
+    width: 380px; min-width: 60px;
+    flex: 0 1 380px; padding: 10px; border: 0;
+    border-radius: 20px 20px 0 0;
+    font: inherit; text-shadow: var(--stroke);
+    margin-left: auto;
+}
+.search:focus {
+    outline: none;
+    border: 0;
+    box-shadow: none;
+}
+.search::placeholder {color: #fff; opacity: 0.5}
+.search::-webkit-search-cancel-button {
+    -webkit-appearance: none; appearance: none;
+    width: 16px; height: 16px;
+    background: url("/assets/images/icons/x.png") no-repeat center / contain;
+    cursor: pointer;
+}
+.search::-ms-clear {
+    width: 16px; height: 16px;
+    background: url("/assets/images/icons/x.png") no-repeat center / contain;
+    border: 0;
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.content {
+    min-height: 520px; overflow: hidden !important;
+    background: var(--soft);
+    border-radius: 0 0 22px 22px; padding: 18px 18px 16px;
+}
+.loading {
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center; z-index: 65535;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.33));
+    padding: 2em 0; user-select: none;
+}
+.loading svg {
+    width: 100px;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,/*0.55*/0.33));
+    animation: rotate 4s linear infinite;
+}
+@keyframes rotate {
+    0% {transform: rotate(0deg)}
+    100% {transform: rotate(360deg)}
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.footer {
+    margin-top: 26px; width: 100%; font-size: 0.95em;
+    display: grid; align-items: end;
+    grid-template-columns: 1fr auto;
+    column-gap: 16px; row-gap: 8px;
+}
+.footer > p {grid-column: 1}
+.footerbadges {
+    grid-column: 2; grid-row: 1 / span 2;
+    display: flex; align-items: center;
+    gap: 12px; flex-wrap: nowrap;
+}
+.footerbadges a {display: inline-flex}
+
+.footerlinks {
+    grid-column: 1;
+    list-style: none; display: flex; flex-wrap: wrap;
+    column-gap: 18px; row-gap: 0; margin-top: 0;
+}
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+/* mobile mode! */
+@media (max-width: 700px) {
+    .page {grid-template-columns: 1fr; padding: 0 20px}
+    .title {padding-right: 0.5em}
+    .sidebar {
+        order: 1; display: flex; flex-direction: row;
+        align-items: center; gap: 1em; justify-content: left;
+    }
+    .logo {margin: 0; max-width: 120px}
+    .wikititle {font-size: 1.25em}
+    .sidebar > .title {margin: 0; padding: 0}
+    .sidebarlinks {
+        display: flex; flex-direction: row;
+        align-items: center; gap: 1em;
+        height: max-content;
+    }
+    .sidebarlinks .navblock {margin-top: 0}
+    .navblocktitle {display: none}
+
+    .main {order: 2}
+    .search {flex-basis: clamp(110px, 34vw, 220px)}
+    .infobox {
+        float: none; margin-left: 0;
+        width: 100%;
+    }
+    .embedleft, .embedright {
+        float: none; width: 100%;
+        margin-left: 0; margin-right: 0;
+    }
+    .footer {
+        grid-template-columns: 1fr;
+        row-gap: 10px;
+    }
+    .footerbadges {
+        grid-column: 1;
+        grid-row: auto;
+    }
+}
+
+/* slight tweaks for extremely low width, 
+   usually not possible but my sites are so mobile unfriendly it's best to at least care */
+@media (max-width: 460px) {
+    .tab {
+        font-size: 0.9em;
+        min-width: 0; padding: 10px 3px;
+        width: min-content;
+    }
+}
