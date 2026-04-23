@@ -10,7 +10,7 @@ title: Cabbit
 image: cabbit.webp
 Species: Holy moly...
 -: Note that you have to provide something to the left (not a space) or the row will be ignored. /articles/media is used by default!
-Suggestion: Try slightly compressing your files so that they load faster on user's end! [SVGs](https://jakearchibald.github.io/svgomg/) · [GIFs](https://ezgif.com/optimize) (use gifski where possible) · [other images](https://squoosh-multiple-export.vercel.app/)
+Suggestion: Try slightly compressing your files so that they load faster on user's end! [SVGs](https://jakearchibald.github.io/svgomg/) · [GIFs](https://ezgif.com/optimize) (use gifski where it's beneficial) · [other images](https://squoosh-multiple-export.vercel.app/)
 Author: [koty\_vezde](https://www.instagram.com/koty_vezde/)
 ::
 

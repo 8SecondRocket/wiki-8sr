@@ -47,7 +47,7 @@
         }
     }
     function makewikihref(target) {
-        return window.location.pathname + wikilinktohash(target);
+        return wikilinktohash(target);
     }
     function isallowedhost(hostname) {
         var lower = String(hostname || "").toLowerCase();
@@ -151,7 +151,7 @@
 
     function parseinline(txt) {
         var escapes = [];
-        var neutralized = String(txt || "").replace(/\\([\\`*_~\[\]\(\)])/g, function (_, ch) {
+        var neutralized = String(txt || "").replace(/\\([\\`*_~\[\]\(\)-])/g, function (_, ch) {
             var token = "%%esc" + escapes.length + "%%";
             escapes.push(ch);
             return token;
@@ -159,7 +159,7 @@
         var safe = escapehtml(neutralized);
 
         safe = safe
-            // inline code with single or double backticks
+            // inline code with single or double ticks
             .replace(/``([^`]+)``/g, "<code>$1</code>")
             .replace(/`([^`]+)`/g, "<code>$1</code>")
             // bold
@@ -184,6 +184,9 @@
             .replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (_, label, href) {
                 return buildlinkhtml(label, href);
             });
+
+        safe = safe.replace(/ - /g, " — ");
+        safe = safe.replace(/\n/g, "<br>");
 
         escapes.forEach(function (ch, idx) {
             safe = safe.replace(new RegExp("%%esc" + idx + "%%", "g"), escapehtml(ch));
@@ -476,31 +479,87 @@
 
     /*//////////////////////////////////////////////////////////////////////*/
 
+    function parseredirect(markdown) {
+        var lines = String(markdown || "").replace(/\r\n/g, "\n").split("\n");
+        for (var i = 0; i < lines.length; i++) {
+            var trimmed = lines[i].trim();
+            if (!trimmed) continue;
+            var m = trimmed.match(/^#redirect\s+\[\[([^\]]+)\]\]$/i);
+            if (m) {
+                return { target: String(m[1] || "").trim() };
+            }
+            break;
+        }
+        return null;
+    }
+    function normalizedtargethash(target) {
+        return "#" + String(target || "").trim().replace(/\s+/g, "_");
+    }
+    function redirectnotice(fromname) {
+        var safe = escapehtml(String(fromname || "").replace(/_/g, " "));
+        var href = escapeattr("#" + String(fromname || "").trim().replace(/\s+/g, "_"));
+        return '<p class="paragraph smalltext redirectnote">(Redirected from <a href="' + href + '">' + safe + "</a>)</p>";
+    }
+    function setpagetitle(hashtitle) {
+        document.title = hashtitle + " - Cut the Rope Modding Wiki!";
+    }
+    function renderarticle(title, markdown, options) {
+        options = options || {};
+        var redirectedfrom = options.redirectedfrom || "";
+        if (!contentroot) return;
+        contentroot.innerHTML =
+            maintitle.replace("$TITLE$", escapehtml(title)) +
+            (redirectedfrom ? redirectnotice(redirectedfrom) : "") +
+            markdowntohtml(markdown);
+        if (window.Prism && typeof window.Prism.highlightAllUnder === "function") {
+            window.Prism.highlightAllUnder(contentroot);
+        }
+    }
     async function loadarticlefromhash() {
         if (!contentroot) return;
 
         var hashval = normalizehash();
         var art = getarticlecandidates(hashval);
         var res = await fetchfirstexisting(art.candidates);
-
-        document.title = art.hashtitle + " - Cut the Rope Modding Wiki!";
+        setpagetitle(art.hashtitle);
 
         // 404 text, basically, feel free to adjust
         if (!res) {
             contentroot.innerHTML =
                 maintitle.replace("$TITLE$", escapehtml(art.hashtitle)) +
                 '<p class="paragraph">There is currently no text in this page. ' +
-                'You can contribute and <a href="https://github.com/CtRHome/wiki/new/main/articles?filename=' + escapeattr(art.title) + '.md">create this page</a>!</p>';
+                'You can contribute by <a href="https://github.com/CtRHome/wiki/new/main/articles?filename=' + escapeattr(art.title) + '.md">creating it</a>!</p>';
             return;
         }
 
-        contentroot.innerHTML =
-            maintitle.replace("$TITLE$", escapehtml(art.hashtitle)) +
-            markdowntohtml(res.markdown);
-        if (window.Prism && typeof window.Prism.highlightAllUnder === "function") {
-            window.Prism.highlightAllUnder(contentroot);
+        var redirectfrom = ""; var seen = {}; var maxredirects = 8;
+        var currenthash = hashval; var currentarticle = art;
+        var currentres = res;
+        for (var r = 0; r < maxredirects; r++) {
+            var redirect = parseredirect(currentres.markdown);
+            if (!redirect || !redirect.target) break;
+            if (!redirectfrom) redirectfrom = currenthash;
+            var targethash = String(redirect.target).trim().replace(/\s+/g, "_");
+            if (!targethash || seen[targethash]) break;
+            seen[targethash] = true;
+
+            currenthash = targethash;
+            currentarticle = getarticlecandidates(currenthash);
+            setpagetitle(currentarticle.hashtitle);
+            window.location.replace("#" + encodeURIComponent(targethash));
+            var targetres = await fetchfirstexisting(currentarticle.candidates);
+            if (!targetres) break;
+            currentres = targetres;
         }
+        renderarticle(currentarticle.hashtitle, currentres.markdown, { redirectedfrom: redirectfrom });
     }
+
+    window.WikiMarkdown = {
+        markdowntohtml: markdowntohtml, renderarticle: renderarticle,
+        normalizehash: normalizehash, displaytitlefrompagename: displaytitlefrompagename,
+        getarticlecandidates: getarticlecandidates, fetchfirstexisting: fetchfirstexisting,
+        loadarticlefromhash: loadarticlefromhash
+    };
 
     window.addEventListener("hashchange", loadarticlefromhash);
     document.addEventListener("DOMContentLoaded", loadarticlefromhash);

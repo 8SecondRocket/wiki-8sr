@@ -125,7 +125,7 @@ document.addEventListener("DOMContentLoaded", function() {
             window.location.href = url;
         });
     }
-
+    
     /*//////////////////////////////////////////////////////////////////////*/
 
     // navigation tool links

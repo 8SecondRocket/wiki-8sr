@@ -48,6 +48,7 @@
                         <li><a href="#Main_Page">Main page</a></li>
                         <li><a href="https://github.com/CtRHome/wiki/commits/main">Recent changes</a></li>
                         <li><a href="#Special:Random Page">Random page</a></li>
+                        <li><a href="#Special:Preview">Article Playground</a></li>
                     </ul>
                 </nav>
                 <hr class="navdivider">
@@ -77,7 +78,17 @@
             <div class="content">
 
                 <div class="loading">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path fill="#fff" d="M89 15q20-2 38 4c28 9 51 34 56 63q6 29-7 57-11 20-30 32a86 86 0 0 1-52 13c-25-1-49-15-63-35a88 88 0 0 1-3-96q16-24 42-33zm1 18q-18 3-33 15c-4 6 11 2 14 4 14 2 29 11 32 26-1 10-11-1-16-2-13-3-27 4-36 13q-12 13-14 31 3 15 14 23c6-5 7-16 13-22q9-14 20-23c3-5 18-5 10 3-12 9-13 27-9 41q7 17 24 23 19 0 33-14c3-6-12-5-15-9q-24-12-26-37c0-10 10 0 11 5 6 9 20 7 29 4 10-4 21-11 25-21q0-15-8-27c-3-4-10-17-12-6q-9 19-25 33c-9 6-9-7-4-12q7-14 0-29c-4-7-8-16-17-19z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" display="block" viewBox="0 0 200 200">
+                        <defs>
+                            <mask id="a">
+                                <path fill="#fff" d="M0 0h200v200H0z"/>
+                                <path stroke="#000" stroke-width="20" d="M89 15q20-2 38 4c28 9 51 34 56 63q6 29-7 57-11 20-30 32a86 86 0 0 1-52 13c-25-1-49-15-63-35a88 88 0 0 1-3-96q16-24 42-33zm1 18q-18 3-33 15c-4 6 11 2 14 4 14 2 29 11 32 26-1 10-11-1-16-2-13-3-27 4-36 13q-12 13-14 31 3 15 14 23c6-5 7-16 13-22q9-14 20-23c3-5 18-5 10 3-12 9-13 27-9 41q7 17 24 23 19 0 33-14c3-6-12-5-15-9q-24-12-26-37c0-10 10 0 11 5 6 9 20 7 29 4 10-4 21-11 25-21q0-15-8-27c-3-4-10-17-12-6q-9 19-25 33c-9 6-9-7-4-12q7-14 0-29c-4-7-8-16-17-19z"/>
+                                <path fill="#fff" stroke="#fff" stroke-width="0" d="M89 15q20-2 38 4c28 9 51 34 56 63q6 29-7 57-11 20-30 32a86 86 0 0 1-52 13c-25-1-49-15-63-35a88 88 0 0 1-3-96q16-24 42-33zm1 18q-18 3-33 15c-4 6 11 2 14 4 14 2 29 11 32 26-1 10-11-1-16-2-13-3-27 4-36 13q-12 13-14 31 3 15 14 23c6-5 7-16 13-22q9-14 20-23c3-5 18-5 10 3-12 9-13 27-9 41q7 17 24 23 19 0 33-14c3-6-12-5-15-9q-24-12-26-37c0-10 10 0 11 5 6 9 20 7 29 4 10-4 21-11 25-21q0-15-8-27c-3-4-10-17-12-6q-9 19-25 33c-9 6-9-7-4-12q7-14 0-29c-4-7-8-16-17-19z"/>
+                            </mask>
+                        </defs>
+                        <path fill="#fff" d="M89 15q20-2 38 4c28 9 51 34 56 63q6 29-7 57-11 20-30 32a86 86 0 0 1-52 13c-25-1-49-15-63-35a88 88 0 0 1-3-96q16-24 42-33zm1 18q-18 3-33 15c-4 6 11 2 14 4 14 2 29 11 32 26-1 10-11-1-16-2-13-3-27 4-36 13q-12 13-14 31 3 15 14 23c6-5 7-16 13-22q9-14 20-23c3-5 18-5 10 3-12 9-13 27-9 41q7 17 24 23 19 0 33-14c3-6-12-5-15-9q-24-12-26-37c0-10 10 0 11 5 6 9 20 7 29 4 10-4 21-11 25-21q0-15-8-27c-3-4-10-17-12-6q-9 19-25 33c-9 6-9-7-4-12q7-14 0-29c-4-7-8-16-17-19z"/>
+                        <path fill="none" stroke="#000" stroke-width="9" d="M89 15q20-2 38 4c28 9 51 34 56 63q6 29-7 57-11 20-30 32a86 86 0 0 1-52 13c-25-1-49-15-63-35a88 88 0 0 1-3-96q16-24 42-33zm1 18q-18 3-33 15c-4 6 11 2 14 4 14 2 29 11 32 26-1 10-11-1-16-2-13-3-27 4-36 13q-12 13-14 31 3 15 14 23c6-5 7-16 13-22q9-14 20-23c3-5 18-5 10 3-12 9-13 27-9 41q7 17 24 23 19 0 33-14c3-6-12-5-15-9q-24-12-26-37c0-10 10 0 11 5 6 9 20 7 29 4 10-4 21-11 25-21q0-15-8-27c-3-4-10-17-12-6q-9 19-25 33c-9 6-9-7-4-12q7-14 0-29c-4-7-8-16-17-19z" mask="url(#a)"/>
+                    </svg>
                     <h2>Loading...</h2>
                 </div>
 
@@ -88,9 +99,9 @@
                 <p>This page was last edited on TODO</p>
                 <ul class="footerlinks">
                     <li><a href="https://github.com/CtRHome/wiki">Repository</a></li>
-                    <li><a href="#Wiki:Credits">Credits</a></li>
-                    <li><a href="#Special:Test">Markdown Help</a></li>
+                    <li><a href="#Wiki:Guidelines">Writing Guidelines</a></li>
                     <li><a href="#Wiki:Legal Disclaimer">Legal Disclaimer</a></li>
+                    <li><a href="#Special:Test">Markdown Example</a></li>
                 </ul>
                 <div class="footerbadges">
                     <a href="https://ctrhome.github.io"><img src="/assets/images/seemore.gif"></a>
@@ -103,6 +114,7 @@
     <script src="assets/static/prism.js"></script>
     <script src="index.js"></script>
     <script src="markdown.js"></script>
+    <script src="preview.js"></script>
 
 </body>
 </html>
