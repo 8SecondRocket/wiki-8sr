@@ -12,16 +12,6 @@ If you're not aware of shifts in the wiki ecosystem, since the start of the pand
 
 Despite many popular wikis attempting to move away from Fandom, the company has made significant efforts to retain them by **removing wiki access** from admins who attempt to add banners announcing a move to a new platform. Most of the time, Fandom's version of a wiki continues to rank above the newer wikis in Google search results. As a result, *outdated and unmoderated Fandom pages* often appear first, which directly contributes to the spread of **misinformation**[^2] and **spam**[^3].
 
-## The Cut the Rope Wiki
-
-::media right
-url: worm.webp
-caption: # Worm
-A villain
-::
-
-Although the current *Cut the Rope* wiki on Fandom is an *exception* in some ways, its focus has still shifted almost entirely towards **[[Om Nom Stories]]**, catering to a younger user base. As a result, it has become more of an "*Om Nom Wiki*" rather than an actual *Cut the Rope* wiki. This site aims to finally create a *hub for the real franchise*, even if much smaller and nerdier.
-
 ## Further reading
 
 For a detailed overview, you can check out the *25+ paragraphs* on Fandom's own [Wikipedia page](https://en.wikipedia.org/wiki/Fandom_(website)#Controversies). Or, for a more enjoyable experience, check out either of these videos:
@@ -30,6 +20,16 @@ For a detailed overview, you can check out the *25+ paragraphs* on Fandom's own 
 by *DIMM4*
 ##### [Stop using Fandom](https://youtu.be/qcfuA_UAz3I)
 by *mossbag*
+
+## The Cut the Rope Wiki
+
+::media right
+url: worm.webp
+caption: # Worm
+A villain
+::
+
+Although the current *Cut the Rope* wiki on Fandom is an *exception* in some ways, its focus has still shifted almost entirely towards **[[Om Nom Stories]]**, catering to a younger userbase. As a result, it has become more of an "*Om Nom Wiki*" rather than an actual *Cut the Rope Wiki*. This site aims to finally create a hub for the real franchise, even if much smaller and nerdier.
 
 > "Okay, but why not *anything* else in this case? Why GitHub?"
 

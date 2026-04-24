@@ -10,18 +10,37 @@ if (logo) {
         var nomindex = randomnoms.indexOf(logoimage.src.replace(window.location.origin + '/', ''));
         if (nomindex === -1) nomindex = 0;
         logoimage.addEventListener('click', function() {
-            var nextIndex;
+            var nomindex;
             do {
-                nextIndex = Math.floor(Math.random() * randomnoms.length);
-            } while (randomnoms.length > 1 && nextIndex === nomindex);
-            logoimage.src = randomnoms[nextIndex];
-            nomindex = nextIndex;
+                nomindex = Math.floor(Math.random() * randomnoms.length);
+            } while (randomnoms.length > 1 && nomindex === nomindex);
+            logoimage.src = randomnoms[nomindex];
+            nomindex = nomindex;
         });
     }
 }
 
-// url "shortener" (like 4 bytes less bruh 😭)
 document.addEventListener("DOMContentLoaded", function() {
+    var fandombadge = document.querySelector(".fandombadge");
+    if (fandombadge) {
+        var fandombadgehiddenkey = "hidefandombadge";
+        var showfandombadge = function() {fandombadge.classList.add("visible")};
+        var hidefandombadge = function() {fandombadge.classList.remove("visible")};
+        try {if (!localStorage.getItem(fandombadgehiddenkey)) {showfandombadge()}} 
+        catch (_err) {}
+
+        var closebutton = fandombadge.querySelector(".closebutton");
+        if (closebutton) {
+            closebutton.addEventListener("click", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                hidefandombadge();
+                try {localStorage.setItem(fandombadgehiddenkey, "1")} 
+                catch (_err) {}
+            });
+        }
+    }
+
     function getexactarticlecandidates(query) {
         var raw = String(query || "").trim();
         var parts = raw.split(":");
@@ -32,14 +51,14 @@ document.addEventListener("DOMContentLoaded", function() {
         var spaced = slug.replace(/_/g, " ");
         return hasprefix
             ? [
-                "articles/~" + prefix + "/" + slug + ".md",
-                "articles/~" + prefix.toLowerCase() + "/" + slug + ".md",
                 "articles/~" + prefix + "/" + spaced + ".md",
-                "articles/~" + prefix.toLowerCase() + "/" + spaced + ".md"
+                "articles/~" + prefix.toLowerCase() + "/" + spaced + ".md",
+                "articles/~" + prefix + "/" + slug + ".md",
+                "articles/~" + prefix.toLowerCase() + "/" + slug + ".md"
             ]
             : [
-                "articles/" + slug + ".md",
-                "articles/" + spaced + ".md"
+                "articles/" + spaced + ".md",
+                "articles/" + slug + ".md"
             ];
     }
     async function findexistingarticlepath(paths) {
@@ -78,7 +97,8 @@ document.addEventListener("DOMContentLoaded", function() {
             }, 1200);
         });
     }
-
+    
+    // url "shortener" (like 4 bytes less bruh 😭)
     var shortlinks = document.querySelectorAll("a.shortlink");
     shortlinks.forEach(function(link) {
         link.addEventListener("click", function(e) {

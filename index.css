@@ -81,7 +81,8 @@ h1, h2, h3, h4, h5, h6 {font-weight: 400}
 .sidebar {
     background: var(--soft);
     border-radius: 0 0 22px 22px; padding: 10px 14px 16px;
-    align-self: start; cursor: pointer;
+    align-self: start; 
+    cursor: url("/assets/static/cursors/active.cur"), default !important;
 }
 .shortlink, .link {
     word-break: break-all;
@@ -155,7 +156,7 @@ h1, h2, h3, h4, h5, h6 {font-weight: 400}
     -webkit-appearance: none; appearance: none;
     width: 16px; height: 16px;
     background: url("/assets/images/icons/x.png") no-repeat center / contain;
-    cursor: pointer;
+    cursor: url("/assets/static/cursors/active.cur"), default !important;
 }
 .search::-ms-clear {
     width: 16px; height: 16px;
@@ -232,7 +233,8 @@ h1, h2, h3, h4, h5, h6 {font-weight: 400}
     position: fixed; left: 2em; bottom: 0;
     width: 50px; height: 30px;
     border: none; border-radius: 60px 60px 0 0;
-    background: var(--soft); cursor: pointer;
+    background: var(--soft);
+    cursor: url("/assets/static/cursors/active.cur"), default !important;
     z-index: 9999;
 }
 .playgroundtoggle img {
@@ -270,6 +272,26 @@ h1, h2, h3, h4, h5, h6 {font-weight: 400}
     gap: 12px; flex-wrap: nowrap;
 }
 .footerbadges a {display: inline-flex}
+
+.fandombadge {
+    display: none;
+    position: relative;
+}
+.fandombadge.visible {display: inline-flex}
+.fandombadge .closebutton {
+    position: absolute; display: inline-flex;
+    align-items: center; justify-content: center;
+    top: -8px; right: -8px;
+    width: 20px; height: 20px;
+    border-radius: 50%; background: rgba(0,0,0,0.5);
+    border: 0; padding: 0;
+    z-index: 2;
+    cursor: url("/assets/static/cursors/active.cur"), default !important;
+}
+.fandombadge .closebutton img {
+    width: 11px; height: 11px;
+    object-fit: contain;
+}
 
 .footerlinks {
     grid-column: 1;
