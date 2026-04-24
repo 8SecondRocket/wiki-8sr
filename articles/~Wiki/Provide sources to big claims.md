@@ -10,4 +10,4 @@ Please provide reliable sources for something that may otherwise seem fabricated
 - If only the description is needed:
 `\[^id]: erm this is factual`
 
-[^1]: Quote
+[^1]: ...cite!

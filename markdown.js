@@ -27,6 +27,10 @@
 
     var externallink = "/assets/images/icons/linkbluesmall.png";
     var activecitationrenderer = null;
+    var pendingredirectnotice = null;
+    var imageoverlay = null;
+    var imageoverlaylink = null;
+    var imageoverlayimg = null;
 
     /*//////////////////////////////////////////////////////////////////////*/
 
@@ -133,6 +137,50 @@
     }
 
     /*//////////////////////////////////////////////////////////////////////*/
+    
+    function hideimageoverlay() {
+        if (!imageoverlay) return;
+        imageoverlay.classList.remove("active");
+    }
+    function ensureimageoverlay() {
+        if (imageoverlay) return;
+
+        imageoverlay = document.createElement("div");
+        imageoverlay.className = "imageoverlay";
+        imageoverlaylink = document.createElement("a");
+        imageoverlaylink.className = "imageoverlaylink";
+        imageoverlaylink.target = "_blank";
+        imageoverlaylink.rel = "noopener noreferrer";
+        imageoverlayimg = document.createElement("img");
+
+        imageoverlaylink.appendChild(imageoverlayimg);
+        imageoverlay.appendChild(imageoverlaylink);
+        document.body.appendChild(imageoverlay);
+
+        imageoverlay.addEventListener("click", function (e) {
+            if (e.target === imageoverlay) hideimageoverlay();
+        });
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") hideimageoverlay();
+        });
+    }
+    function bindexpandableimages(scope) {
+        ensureimageoverlay();
+        var images = scope.querySelectorAll(".infobox img, .embed img");
+        images.forEach(function (img) {
+            if (img.dataset.expandbound === "1") return;
+            img.dataset.expandbound = "1";
+            img.classList.add("expandableimage");
+            img.addEventListener("click", function () {
+                imageoverlayimg.src = img.currentSrc || img.src;
+                imageoverlayimg.alt = img.alt || "";
+                imageoverlaylink.href = img.currentSrc || img.src;
+                imageoverlay.classList.add("active");
+            });
+        });
+    }
+
+    /*//////////////////////////////////////////////////////////////////////*/
 
     function normalizehash() {
         var raw = window.location.hash ? window.location.hash.slice(1) : "Main_Page";
@@ -193,7 +241,7 @@
                 return '<a href="' + escapeattr(makewikihref(t)) + '">' + t.replace(/_/g, " ") + "</a>";
             })
             // external links
-            .replace(/\[([^\]]+)\]\(([^)]+)\)/g, function (_, label, href) {
+            .replace(/\[([^\]]+)\]\(((?:[^()\s]+|\([^()]*\))+)\)/g, function (_, label, href) {
                 return buildlinkhtml(label, href);
             })
             // cite references like [^id] and cite needed like [^?]
@@ -360,20 +408,28 @@
         function escid(id) {
             return String(id || "").replace(/[^a-z0-9_-]/gi, "-");
         }
+        function parsecitationlinks(raw) {
+            var source = String(raw || "").trim();
+            if (!source) return [];
+            return source
+                .split(/\s+/)
+                .map(function (chunk) { return chunk.trim(); })
+                .filter(function (chunk) { return /^(https?:\/\/|mailto:)/i.test(chunk); });
+        }
         function parsecitationdefinition(raw) {
             var val = String(raw || "").trim();
-            if (!val) return { desc: "", link: "" };
+            if (!val) return { desc: "", links: [] };
             var pipe = val.indexOf("|");
             if (pipe !== -1) {
                 return {
                     desc: val.slice(0, pipe).trim(),
-                    link: val.slice(pipe + 1).trim()
+                    links: parsecitationlinks(val.slice(pipe + 1))
                 };
             }
             if (/^(https?:\/\/|mailto:)/i.test(val)) {
-                return { desc: "", link: val };
+                return { desc: "", links: parsecitationlinks(val) };
             }
-            return { desc: val, link: "" };
+            return { desc: val, links: [] };
         }
         function extractinlinedefinition(line) {
             var source = String(line || "");
@@ -528,14 +584,22 @@
         closelist(); closequote();
         if (citationorder.length) {
             var refs = citationorder.map(function (id) {
-                var def = citationdefs[id] || { desc: "", link: "" };
+                var def = citationdefs[id] || { desc: "", links: [] };
                 var idx = citationsbyid[id];
                 var chunks = [];
                 if (def.desc) chunks.push(inlinewithcites(def.desc));
-                if (def.link) {
-                    var safelink = sanitizehref(def.link);
-                    var linklabel = def.desc ? "Source link" : def.link;
-                    chunks.push(buildlinkhtml(escapehtml(linklabel), safelink));
+                if (def.links && def.links.length) {
+                    var linkhtml = def.links.map(function (rawlink, linkidx) {
+                        var safelink = sanitizehref(rawlink);
+                        var linklabel;
+                        if (def.desc) {
+                            linklabel = def.links.length > 1 ? "Source " + (linkidx + 1) : "Source link";
+                        } else {
+                            linklabel = rawlink;
+                        }
+                        return buildlinkhtml(escapehtml(linklabel), safelink);
+                    }).join(" ");
+                    chunks.push(linkhtml);
                 }
                 if (!chunks.length) chunks.push('<span class="infoboxwarning">(no citation details, this is likely a mistake)</span>');
                 return '<li id="cite' + idx + '">' + chunks.join(" ") + ' <a class="citeback" href="#" data-cite-target="citeref' + idx + '">↑</a></li>';
@@ -587,7 +651,11 @@
             if (!trimmed) continue;
             var m = trimmed.match(/^#redirect\s+\[\[([^\]]+)\]\]$/i);
             if (m) {
-                return { target: String(m[1] || "").trim() };
+                return { target: String(m[1] || "").trim(), externalurl: "" };
+            }
+            var ext = trimmed.match(/^#redirect\s+(https:\/\/\S+)$/i);
+            if (ext) {
+                return { target: "", externalurl: String(ext[1] || "").trim() };
             }
             break;
         }
@@ -615,6 +683,7 @@
         if (window.Prism && typeof window.Prism.highlightAllUnder === "function") {
             window.Prism.highlightAllUnder(contentroot);
         }
+        bindexpandableimages(contentroot);
         var citeanchors = contentroot.querySelectorAll("[data-cite-target]");
         citeanchors.forEach(function (anchor) {
             anchor.addEventListener("click", function (e) {
@@ -631,6 +700,11 @@
         if (!contentroot) return;
 
         var hashval = normalizehash();
+        var inheritedredirectfrom = "";
+        if (pendingredirectnotice && pendingredirectnotice.target === hashval) {
+            inheritedredirectfrom = pendingredirectnotice.from || "";
+            pendingredirectnotice = null;
+        }
         var art = getarticlecandidates(hashval);
         var res = await fetchfirstexisting(art.candidates);
         setpagetitle(art.hashtitle);
@@ -645,16 +719,22 @@
             return;
         }
 
-        var redirectfrom = ""; var seen = {}; var maxredirects = 8;
+        var redirectfrom = inheritedredirectfrom; var seen = {}; var maxredirects = 8;
         var currenthash = hashval; var currentarticle = art;
         var currentres = res;
         for (var r = 0; r < maxredirects; r++) {
             var redirect = parseredirect(currentres.markdown);
-            if (!redirect || !redirect.target) break;
+            if (!redirect) break;
+            if (redirect.externalurl) {
+                window.location.replace(redirect.externalurl);
+                return;
+            }
+            if (!redirect.target) break;
             if (!redirectfrom) redirectfrom = currenthash;
             var targethash = String(redirect.target).trim().replace(/\s+/g, "_");
             if (!targethash || seen[targethash]) break;
             seen[targethash] = true;
+            pendingredirectnotice = {target: targethash, from: redirectfrom};
 
             currenthash = targethash;
             currentarticle = getarticlecandidates(currenthash);

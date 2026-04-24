@@ -57,8 +57,8 @@ ol * {
     background: rgba(0,0,0,0.2);
     border-radius: 10px;
 }
-.quote p { margin: 0 0 8px; }
-.quote p:last-child { margin-bottom: 0; }
+.quote p {margin: 0 0 8px}
+.quote p:last-child {margin-bottom: 0}
 .section {margin-top: 18px}
 
 .sectiontitle {
@@ -82,11 +82,10 @@ ol * {
 }
 
 .content h2, .content h3, .content h4 {
-    margin: 16px 0 10px;
-    padding-bottom: 6px;
+    margin: 10px 0 10px;
 }
 .content code {
-    font-family: "JetBrains Mono", monospace;
+    font-family: "jetbrainsmono", monospace;
     font-size: 0.9em;
     background: rgba(0,0,0,0.25);
     border-radius: 6px; padding: 2px 6px;

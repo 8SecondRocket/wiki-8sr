@@ -1,1 +1,1 @@
-#REDIRECT [[NO]]
+#REDIRECT https://x.com/sogful/status/1687887989211299840
