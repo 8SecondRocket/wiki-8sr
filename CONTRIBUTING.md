@@ -70,7 +70,7 @@ The rest should be trivial to understand.
 Any code additions or changes that do not have
 - Very careless vibecoding,
 - A minified-esque format,
-- Or the opposite — [convoluted functions](/articles/Media/goodpractice.jpg) that can be easily done in a much simpler way
+- Or the opposite — [convoluted functions](articles/Media/goodpractice.jpg) that can be easily done in a much simpler way
 
 should be fine to do!
 
