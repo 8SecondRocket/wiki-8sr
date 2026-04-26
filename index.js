@@ -202,7 +202,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         if (shownt) {
             var img = document.createElement('img');
-            img.className = "lol"; img.src = "/assets/images/lol.png";
+            img.className = "lol"; img.src = "assets/images/lol.png";
             img.draggable = false; img.style.position = "fixed";
             img.style.bottom = "2em"; img.style.right = "2em";
             img.style.zIndex = "50000";

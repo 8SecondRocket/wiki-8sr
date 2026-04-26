@@ -73,7 +73,7 @@
         if (!panel || !togglebutton) return;
         panel.style.display = collapsed ? "none" : "";
         localStorage.setItem(hiddenkey, collapsed ? "1" : "");
-        togglebutton.querySelector("img").src = collapsed ? "/assets/images/icons/up.png" : "/assets/images/icons/down.png";
+        togglebutton.querySelector("img").src = collapsed ? "assets/images/icons/up.png" : "assets/images/icons/down.png";
         if (!collapsed && textarea) textarea.focus();
     }
     function ensuresubmittab() {
@@ -116,8 +116,8 @@
         panel = document.createElement("section");
         panel.className = "playgroundpanel";
         panel.innerHTML =
-            '<button class="playgrounddraghandle" title="Drag panel"></button>' +
-            '<button class="playgroundresizehandle" title="Resize panel"></button>' +
+            '<button class="playgrounddraghandle"></button>' +
+            '<button class="playgroundresizehandle"></button>' +
             '<div class="playgroundeditor">' +
             '<textarea class="playgroundinput" spellcheck="false" placeholder="Write markdown here..."></textarea>' +
             "</div>";
@@ -125,7 +125,7 @@
         togglebutton = document.createElement("button");
         togglebutton.className = "playgroundtoggle";
         togglebutton.title = "Hide or show editor";
-        togglebutton.innerHTML = '<img src="/assets/images/icons/down.png" alt="">';
+        togglebutton.innerHTML = '<img src="assets/images/icons/down.png">';
         document.body.appendChild(togglebutton);
 
         textarea = panel.querySelector(".playgroundinput");

@@ -78,7 +78,7 @@ ol * {
 .articlelist li::before {
     content: ""; position: absolute;
     left: 0; width: 14px; height: 14px;
-    background: url("/assets/images/icons/bullet.png") no-repeat center / contain;
+    background: url("assets/images/icons/bullet.png") no-repeat center / contain;
 }
 
 .content h2, .content h3, .content h4 {

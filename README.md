@@ -1,4 +1,4 @@
-<img src="/assets/svgs/biglogo.svg">
+<img src="assets/svgs/biglogo.svg">
 
 *Welcome!* This repository serves as a host for markdown files for the wiki and its code. It is all published straight from the repository through GitHub Pages.
 See ``/articles/`` for the full list.

@@ -1,4 +1,4 @@
-<img src="/assets/svgs/contributing.svg"> <!-- i spent 30 minutes on this bart simpson, no views i bet! so see ya -->
+<img src="assets/svgs/contributing.svg"> <!-- i spent 30 minutes on this bart simpson, no views i bet! so see ya -->
 
 ## Writing articles
 

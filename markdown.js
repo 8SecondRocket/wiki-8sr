@@ -26,7 +26,7 @@
     };
     var reservedprefixes = ["special", "wiki"];
 
-    var externallink = "/assets/images/icons/linkbluesmall.png";
+    var externallink = "assets/images/icons/linkbluesmall.png";
     var activecitationrenderer = null;
     var pendingredirectnotice = null;
     var imageoverlay = null;
@@ -286,7 +286,7 @@
     function renderdangercard(title, text) {
         return (
             '<section class="card carddanger">' +
-            '<h3><img class="cardicon" src="/assets/images/icons/danger.png"> ' + parseinline(title || "Danger") + "</h3>" +
+            '<h3><img class="cardicon" src="assets/images/icons/danger.png"> ' + parseinline(title || "Danger") + "</h3>" +
             "<p>" + parseinline(text || "") + "</p>" +
             "</section>"
         );
@@ -379,8 +379,8 @@
             var cardtype = (args[0] || "info").toLowerCase();
             if (cardtype !== "warning" && cardtype !== "danger" && cardtype !== "info") cardtype = "info";
             var icon = cardtype === "danger"
-                ? "/assets/images/icons/danger.png"
-                : (cardtype === "warning" ? "/assets/images/icons/warning.png" : "/assets/images/icons/info.png");
+                ? "assets/images/icons/danger.png"
+                : (cardtype === "warning" ? "assets/images/icons/warning.png" : "assets/images/icons/info.png");
 
             return (
                 '<section class="card card' + cardtype + '">' +
