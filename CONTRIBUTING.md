@@ -1,5 +1,7 @@
 <img src="assets/svgs/contributing.svg"> <!-- i spent 30 minutes on this bart simpson, no views i bet! so see ya -->
 
+Members from the [Cut the Rope Home Organization](https://github.com/ctrh-org) are free to directly commit to the repository, meanwhile others are free to send pull requests for review. When editing various files as a non-collaborator GitHub automatically suggests creating a fork so this should hopefully be easy to do.
+
 ## Writing articles
 
 - Set a proper name for your article — it will be the same as the filename, except with all underscores (`_`) swapped for spaces (` `).
@@ -70,8 +72,7 @@ Any code additions or changes that do not have
 - A minified-esque format,
 - Or the opposite — [convoluted functions](/articles/Media/goodpractice.jpg) that can be easily done in a much simpler way
 
-should be fine to commit!
-<sup>(or start a [pull request](https://github.com/CtRHome/wiki/pulls) if you're unsure)</sup>
+should be fine to do!
 
 **Slight roadblocks**
 <sup>· All of the CSS usually has multiple properties stacked per line to reduce the space taken up;</sup>
