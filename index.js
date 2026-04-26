@@ -1,4 +1,5 @@
 // cycles through noms when clicking on the logo : )
+// perhaps add more om nom vectors you have here
 var randomnoms = [
     "assets/svgs/logo.svg",
     "assets/svgs/logo2.svg"
@@ -7,15 +8,15 @@ var logo = document.querySelector(".logo");
 if (logo) {
     var logoimage = logo.querySelector("img");
     if (logoimage) {
-        var nomindex = randomnoms.indexOf(logoimage.src.replace(window.location.origin + '/', ''));
-        if (nomindex === -1) nomindex = 0;
+        var currentnomindex = randomnoms.indexOf(logoimage.src.replace(window.location.origin + '/', ''));
+        if (currentnomindex === -1) currentnomindex = 0;
         logoimage.addEventListener('click', function() {
-            var nomindex;
+            var nextindex;
             do {
-                nomindex = Math.floor(Math.random() * randomnoms.length);
-            } while (randomnoms.length > 1 && nomindex === nomindex);
-            logoimage.src = randomnoms[nomindex];
-            nomindex = nomindex;
+                nextindex = Math.floor(Math.random() * randomnoms.length);
+            } while (randomnoms.length > 1 && nextindex === currentnomindex);
+            currentnomindex = nextindex;
+            logoimage.src = randomnoms[currentnomindex];
         });
     }
 }
@@ -141,11 +142,73 @@ document.addEventListener("DOMContentLoaded", function() {
             window.location.href = url;
         });
     }
+
+    /*//////////////////////////////////////////////////////////////////////*/
+
+    var lasteditrequestid = 0;
+    async function updatelasteditedtext(articlepath) {
+        var footerlabel = document.querySelector(".lastedit");
+        if (!footerlabel) return;
+        var requestid = ++lasteditrequestid;
+        footerlabel.textContent = "This page was last edited on...";
+
+        var apipath = "https://api.github.com/repos/CtRHome/wiki/commits?path=" + encodeURIComponent(articlepath) + "&per_page=1";
+        try {
+            var response = await fetch(apipath, {headers: {"Accept": "application/vnd.github+json"}});
+            if (!response.ok) throw new Error("github api returned an error: " + response.status);
+
+            var commits = await response.json();
+            if (requestid !== lasteditrequestid) return;
+            if (!Array.isArray(commits) || !commits.length || !commits[0] || !commits[0].commit) {
+                footerlabel.textContent = "This page was last edited on an unknown date.";
+                return;
+            }
+
+            var commit = commits[0].commit;
+            var datevalue = (commit.committer && commit.committer.date) || (commit.author && commit.author.date) || "";
+            if (!datevalue) {
+                footerlabel.textContent = "This page was last edited on an unknown date.";
+                return;
+            }
+
+            var parsed = new Date(datevalue);
+            if (isNaN(parsed.getTime())) {
+                footerlabel.textContent = "This page was last edited on an unknown date.";
+                return;
+            }
+
+            var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            var day = String(parsed.getUTCDate());
+            var month = months[parsed.getUTCMonth()];
+            var year = String(parsed.getUTCFullYear());
+            var hour = String(parsed.getUTCHours()).padStart(2, "0");
+            var minute = String(parsed.getUTCMinutes()).padStart(2, "0");
+
+            var authorlogin = commits[0] && commits[0].author && commits[0].author.login ? commits[0].author.login : "";
+            var authorurl = commits[0] && commits[0].author && commits[0].author.html_url ? commits[0].author.html_url : "";
+            var authorname = authorlogin || ((commit.author && commit.author.name) ? commit.author.name : "unknown");
+
+            footerlabel.textContent = "This page was last edited on " + day + " " + month + " " + year + ", at " + hour + ":" + minute + " (UTC) by ";
+            if (authorurl && authorlogin) {
+                var authorlink = document.createElement("a");
+                authorlink.href = authorurl;
+                authorlink.textContent = authorlogin;
+                authorlink.target = "_blank";
+                authorlink.rel = "noopener noreferrer";
+                footerlabel.appendChild(authorlink);
+                footerlabel.appendChild(document.createTextNode("."));
+            } else {
+                footerlabel.appendChild(document.createTextNode(authorname + "."));
+            }
+        } catch (_err) {
+            if (requestid !== lasteditrequestid) return;
+            footerlabel.textContent = "This page was last edited on an unknown date.";
+        }
+    }
     
     /*//////////////////////////////////////////////////////////////////////*/
 
     // navigation tool links
-
     var discussionapi = "https://discuss.w.candies.monster";
     var discussionrequestid = 0;
     var localdebug = /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname); // this prevents request spamming for the sake of that daily 100k request limit
@@ -167,6 +230,8 @@ document.addEventListener("DOMContentLoaded", function() {
             ? "articles/~" + prefix + "/" + pagename + ".md"
             : "articles/" + pagename + ".md";
     }
+
+    /*//////////////////////////////////////////////////////////////////////*/
 
     function getarticletitlefromhash() {
         var hash = normalizehash();
@@ -259,6 +324,7 @@ document.addEventListener("DOMContentLoaded", function() {
             edit.style.display = iseditblocked ? "none" : "";
         }
         if (viewhistory) viewhistory.href = "https://github.com/CtRHome/wiki/commits/main/" + articlepath;
+        updatelasteditedtext(articlepath);
     }
 
     setactionlinks();
